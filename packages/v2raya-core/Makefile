@@ -46,6 +46,7 @@ define Package/v2raya-core/description
 endef
 
 define Package/v2raya-core/install
+	$(call GoPackage/Package/Install/Bin,$(PKG_INSTALL_DIR))
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/main $(1)/usr/bin/v2raya_core
 endef
