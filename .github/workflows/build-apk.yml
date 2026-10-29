@@ -1,0 +1,88 @@
+name: build-apk
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
+          - aarch64_cortex-a53
+          - mipsel_24kc
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build packages
+        uses: openwrt/gh-action-sdk@7fc2640243284ecc44f4a9c3f749a61746ee02cb # v11
+        env:
+          ARCH: ${{ matrix.arch }}-25.12.6
+          FEEDNAME: custom
+          PACKAGES: v2raya-core v2raya
+          INDEX: "0"
+          NO_REFRESH_CHECK: "true"
+
+      - name: Collect artifacts
+        run: |
+          set -eu
+          mkdir -p "dist/${{ matrix.arch }}"
+          for f in "bin/packages/${{ matrix.arch }}/custom"/*.apk; do
+            base=$(basename "$f" .apk)
+            cp "$f" "dist/${{ matrix.arch }}/${base}-${{ matrix.arch }}.apk"
+          done
+          cd "dist/${{ matrix.arch }}"
+          sha256sum ./*.apk > "sha256sums-${{ matrix.arch }}"
+          cat "sha256sums-${{ matrix.arch }}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: v2raya-${{ matrix.arch }}
+          path: dist/${{ matrix.arch }}/
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: v2raya-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes \
+              release-assets/*
+          fi
