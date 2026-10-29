@@ -27,9 +27,8 @@ feed_setup='
 	grep -q "src-link custom /work" feeds.conf 2>/dev/null ||
 		echo "src-link custom /work" >> feeds.conf
 	./scripts/feeds update -a
-	./scripts/feeds install -a
-	./scripts/feeds install -p custom -f v2raya-core v2raya
 	make defconfig
+	./scripts/feeds install -p custom -f v2raya-core v2raya
 	make package/v2raya-core/compile V=s
 	make package/v2raya/compile V=s
 	cp bin/packages/$ARCH/custom/*.apk /out/
@@ -41,9 +40,8 @@ if [ -n "$SDK_DIR" ]; then
 	grep -q "src-link custom $ROOT" feeds.conf 2>/dev/null ||
 		echo "src-link custom $ROOT" >> feeds.conf
 	./scripts/feeds update -a
-	./scripts/feeds install -a
-	./scripts/feeds install -p custom -f v2raya-core v2raya
 	make defconfig
+	./scripts/feeds install -p custom -f v2raya-core v2raya
 	make package/v2raya-core/compile V=s
 	make package/v2raya/compile V=s
 	cp bin/packages/"$ARCH"/custom/*.apk "$OUT"/

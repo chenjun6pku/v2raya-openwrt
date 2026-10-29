@@ -61,7 +61,7 @@ define Package/v2raya
   TITLE:=v2rayA web GUI for transparent proxy
   URL:=https://github.com/v2rayA/v2rayA
   DEPENDS:=$(GO_ARCH_DEPENDS) +v2raya-core +ca-bundle +v2ray-geoip +v2ray-geosite +kmod-tun +kmod-nft-tproxy +ip-full
-  EXTRA_DEPENDS:=v2raya-core (= $(PKG_VERSION)-r$(PKG_RELEASE))
+  EXTRA_DEPENDS:=v2raya-core (=$(PKG_VERSION)-r$(PKG_RELEASE))
 endef
 
 define Package/v2raya/description
