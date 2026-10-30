@@ -11,13 +11,25 @@
 | Web asset | https://github.com/v2rayA/v2rayA/releases/download/v2.5.10/web.tar.gz |
 | Web SHA256 | c25071a27f7b98eebb1a80d44b8d6a65d7533cf4cdff475ec86343d7deca5c86 |
 
+## LuCI application
+
+The `packages/luci-app-v2raya` directory is a snapshot of the ImmortalWrt
+LuCI application:
+
+- URL: https://github.com/immortalwrt/luci
+- Path: `applications/luci-app-v2raya`
+- License: Apache-2.0
+- Local changes are recorded in `packages/luci-app-v2raya/UPSTREAM.md`.
+
 ## Licenses
 
 - `service/` and the repository root: AGPL-3.0-only
 - `core/`: MPL-2.0
+- `luci-app-v2raya`: Apache-2.0
 
-The adapter repository itself is MIT-licensed. The built binaries and the
-embedded web UI remain under their upstream licenses.
+The adapter repository itself is MIT-licensed. The built binaries, the
+embedded web UI, and the LuCI application remain under their upstream
+licenses.
 
 ## Local changes
 

@@ -19,10 +19,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch:
-          - x86_64
-          - aarch64_cortex-a53
-          - mipsel_24kc
+        include:
+          - arch: x86_64
+            packages: "v2raya-core v2raya luci-app-v2raya"
+          - arch: aarch64_cortex-a53
+            packages: "v2raya-core v2raya"
+          - arch: mipsel_24kc
+            packages: "v2raya-core v2raya"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -34,7 +37,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-25.12.6
           FEEDNAME: custom
-          PACKAGES: v2raya-core v2raya
+          PACKAGES: ${{ matrix.packages }}
           INDEX: "0"
           NO_REFRESH_CHECK: "true"
 
@@ -42,19 +45,54 @@ jobs:
         run: |
           set -eu
           mkdir -p "dist/${{ matrix.arch }}"
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            mkdir -p dist/all
+          fi
           for f in "bin/packages/${{ matrix.arch }}/custom"/*.apk; do
-            base=$(basename "$f" .apk)
-            cp "$f" "dist/${{ matrix.arch }}/${base}-${{ matrix.arch }}.apk"
+            [ -e "$f" ] || continue
+            name=$(basename "$f")
+            case "$name" in
+              luci-*)
+                cp "$f" dist/all/
+                ;;
+              *)
+                base=${name%.apk}
+                cp "$f" "dist/${{ matrix.arch }}/${base}-${{ matrix.arch }}.apk"
+                ;;
+            esac
           done
           cd "dist/${{ matrix.arch }}"
           sha256sum ./*.apk > "sha256sums-${{ matrix.arch }}"
           cat "sha256sums-${{ matrix.arch }}"
 
-      - name: Upload artifacts
+          cd "$GITHUB_WORKSPACE"
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            found=0
+            for f in dist/all/*.apk; do
+              [ -e "$f" ] || continue
+              found=1
+            done
+            if [ "$found" -ne 1 ]; then
+              echo "no architecture-independent packages were built" >&2
+              exit 1
+            fi
+            (cd dist/all && sha256sum ./*.apk > sha256sums-all && cat sha256sums-all)
+          fi
+
+      - name: Upload architecture artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: v2raya-${{ matrix.arch }}
           path: dist/${{ matrix.arch }}/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload architecture-independent artifacts
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: v2raya-all
+          path: dist/all/
           if-no-files-found: error
           retention-days: 30
 
