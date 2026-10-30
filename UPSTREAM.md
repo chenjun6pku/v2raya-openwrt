@@ -13,13 +13,16 @@
 
 ## LuCI application
 
-The `packages/luci-app-v2raya` directory is a snapshot of the ImmortalWrt
-LuCI application:
+The `packages/luci-app-v2raya` directory is a snapshot of the canonical
+v2rayA OpenWrt packaging:
 
-- URL: https://github.com/immortalwrt/luci
-- Path: `applications/luci-app-v2raya`
+- URL: https://github.com/v2rayA/v2raya-openwrt
+- Path: `luci-app-v2raya`
+- Ref: `d288e54992b03365a2f6cf2e8932b5031dc2cf70`
 - License: Apache-2.0
 - Local changes are recorded in `packages/luci-app-v2raya/UPSTREAM.md`.
+
+The package's copyright and original LuCI application are from ImmortalWrt.org.
 
 ## Licenses
 

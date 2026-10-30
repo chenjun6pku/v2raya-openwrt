@@ -218,4 +218,4 @@ UPSTREAM.md                 上游版本、commit、哈希和许可证
 上游源码：
 
 - https://github.com/v2rayA/v2rayA/tree/v2.5.10
-- https://github.com/immortalwrt/luci/tree/master/applications/luci-app-v2raya
+- https://github.com/v2rayA/v2raya-openwrt/tree/master/luci-app-v2raya
